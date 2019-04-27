@@ -76,12 +76,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="MAP"
+        android:text="Donation"
         android:textColor="#FFFFFF"
         android:textSize="25dp"
         android:layout_marginTop="30dp"
         android:background="@drawable/drawbutton"
-        android:onClick="openMap"
+        android:onClick="openDonation"
         />
 
     <Button

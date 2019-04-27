@@ -1,52 +1,97 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
->
+    android:background="#FAFAFA"
+    android:orientation="vertical">
+
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:src="@mipmap/logo" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center_vertical">
-        <LinearLayout
+        android:orientation="horizontal"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="50dp">
+
+
+        <EditText
+            android:id="@+id/CNum"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Car ID"/>
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/name"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Password"/>
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:id="@+id/password"/>
-        </LinearLayout>
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Log in"
-            android:layout_margin="10dp"
-            android:onClick="login"
-            android:id="@+id/login"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_height="45dp"
+            android:layout_marginRight="35dp"
+            android:background="@drawable/draw1"
+            android:hint="   Campaign ID"
+            android:drawableLeft="@mipmap/mm"
+            android:paddingLeft="30dp"
+            android:textColor="@android:color/black"
+            android:maxLines="1"
+            android:inputType="number"
+            />
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="10dp">
+
+
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginRight="35dp"
+            android:background="@drawable/draw1"
+            android:hint="   Your Card ID"
+            android:drawableLeft="@mipmap/mm"
+            android:paddingLeft="30dp"
+            android:textColor="@android:color/black"
+            android:maxLines="1"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="10dp">
+
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_marginRight="35dp"
+            android:background="@drawable/draw1"
+            android:hint="   Your Password"
+            android:paddingLeft="30dp"
+            android:drawableLeft="@mipmap/lock3"
+            android:textColor="@android:color/black"
+            android:inputType="textPassword"
+            />
+    </LinearLayout>
+
+
+
+    <Button
+        android:layout_width="140dp"
+        android:layout_height="54dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/draw6"
+        android:text="Log in"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="20dp" />
+
 </LinearLayout>

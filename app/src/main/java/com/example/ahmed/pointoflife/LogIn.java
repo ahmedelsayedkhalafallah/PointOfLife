@@ -22,10 +22,10 @@ public class LogIn extends AppCompatActivity {
 
     DatabaseReference mRoot;
     Map<String,Car> h;
-    Map<String,Hospital> h2;
-    Map<String,Admin> h3;
-    EditText name,password;
-    String Id,Pass;
+//    Map<String,Hospital> h2;
+//    Map<String,Admin> h3;
+    EditText name,password,campaignNumber;
+    String Id,Pass,CNum;
     Button login;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +33,11 @@ public class LogIn extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         h = new HashMap<String, Car>();
-        h2 = new HashMap<String, Hospital>();
-        h3 = new HashMap<String, Admin>();
+//        h2 = new HashMap<String, Hospital>();
+//        h3 = new HashMap<String, Admin>();
         name = findViewById(R.id.name);
         password = findViewById(R.id.password);
+        campaignNumber = findViewById(R.id.CNum);
         mRoot = FirebaseDatabase.getInstance().getReference().child("cars");
         login = findViewById(R.id.login);
         login.setOnClickListener(new View.OnClickListener() {
@@ -45,6 +46,7 @@ public class LogIn extends AppCompatActivity {
 
         Id = name.getText().toString();
         Pass = password.getText().toString();
+        CNum = campaignNumber.getText().toString();
 
                 getValues(new OnGetDataListener(){
                     @Override
@@ -52,9 +54,10 @@ public class LogIn extends AppCompatActivity {
                         if(!(h.isEmpty())){
                             if(h.containsKey(Id)) {
                                 if (Pass.equals(String.valueOf(h.get(Id).getPassword()))) {
-                                    Intent intent = new Intent(LogIn.this, MainActivity.class);
+
+                                    Intent intent = new Intent(LogIn.this, choose.class);
                                     intent.putExtra("carID", h.get(Id).getId().toString());
-                                    intent.putExtra("HospitalID", h.get(Id).getHospital().toString());
+                                    intent.putExtra("CampaignID", h.get(Id).getHospital().toString());
                                     startActivity(intent);
                                 }
                                 else {
@@ -62,44 +65,46 @@ public class LogIn extends AppCompatActivity {
 
                                 }
                             }
-
-
-                        }
-                        else{
-
-                        }
-
-                        if(!(h2.isEmpty())){
-                            if(h2.containsKey(Id)) {
-                                if (Pass.equals(String.valueOf(h2.get(Id).getPassword()))) {
-                                    Intent intent = new Intent(LogIn.this, choose.class);
-                                    intent.putExtra("id",h2.get(Id).getId());
-                                    startActivity(intent);
-                                }
-                                else{
-                                    Toast.makeText(LogIn.this, "wrong password", Toast.LENGTH_SHORT).show();
-                                }
+                            else{
+                                Toast.makeText(LogIn.this, "User Not found", Toast.LENGTH_SHORT).show();
                             }
-                        }
-                        else{
 
                         }
-
-                        if(!(h3.isEmpty())){
-                            if(h3.containsKey(Id)) {
-                                if (Pass.equals(String.valueOf(h3.get(Id).getPassword()))) {
-                                    Intent intent = new Intent(LogIn.this, hospitals.class);
-                                    intent.putExtra("id", h3.get(Id).getName());
-                                    startActivity(intent);
-                                }
-                                else{
-                                    Toast.makeText(LogIn.this, "wrong password", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
                         else{
-                            Toast.makeText(LogIn.this, "User not found", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LogIn.this, "No registered users", Toast.LENGTH_SHORT).show();
                         }
+
+//                        if(!(h2.isEmpty())){
+//                            if(h2.containsKey(Id)) {
+//                                if (Pass.equals(String.valueOf(h2.get(Id).getPassword()))) {
+//                                    Intent intent = new Intent(LogIn.this, choose.class);
+//                                    intent.putExtra("id",h2.get(Id).getId());
+//                                    startActivity(intent);
+//                                }
+//                                else{
+//                                    Toast.makeText(LogIn.this, "wrong password", Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
+//                        }
+//                        else{
+//
+//                        }
+//
+//                        if(!(h3.isEmpty())){
+//                            if(h3.containsKey(Id)) {
+//                                if (Pass.equals(String.valueOf(h3.get(Id).getPassword()))) {
+//                                    Intent intent = new Intent(LogIn.this, hospitals.class);
+//                                    intent.putExtra("id", h3.get(Id).getName());
+//                                    startActivity(intent);
+//                                }
+//                                else{
+//                                    Toast.makeText(LogIn.this, "wrong password", Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
+//                        }
+//                        else{
+//                            Toast.makeText(LogIn.this, "User not found", Toast.LENGTH_SHORT).show();
+//                        }
 
                     }
 
@@ -190,45 +195,45 @@ void getValues(final OnGetDataListener onGetDataListener){
     };
     carsRef.addListenerForSingleValueEvent(valueEventListener);
 
-    DatabaseReference rootRef2 = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference hospitalsRef = rootRef2.child("hospitals");
-    ValueEventListener valueEventListener2 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                Hospital hospital = ds.getValue(Hospital.class);
-                h2.put(hospital.getId(),hospital);
-            }
-            onGetDataListener.onSuccess(dataSnapshot,0.0,"");
-        }
+//    DatabaseReference rootRef2 = FirebaseDatabase.getInstance().getReference();
+//    DatabaseReference hospitalsRef = rootRef2.child("hospitals");
+//    ValueEventListener valueEventListener2 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            for(DataSnapshot ds : dataSnapshot.getChildren()) {
+//                Hospital hospital = ds.getValue(Hospital.class);
+//                h2.put(hospital.getId(),hospital);
+//            }
+//            onGetDataListener.onSuccess(dataSnapshot,0.0,"");
+//        }
+//
+//        @Override
+//        public void onCancelled(@NonNull DatabaseError databaseError) {
+//            System.out.print(databaseError.getMessage());
+//        onGetDataListener.onFailure();
+//        }
+//    };
+//    hospitalsRef.addListenerForSingleValueEvent(valueEventListener2);
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            System.out.print(databaseError.getMessage());
-        onGetDataListener.onFailure();
-        }
-    };
-    hospitalsRef.addListenerForSingleValueEvent(valueEventListener2);
-
-    DatabaseReference rootRef3 = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference adminsRef = rootRef3.child("admins");
-    ValueEventListener valueEventListener3 = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                Admin admin = ds.getValue(Admin.class);
-                h3.put(admin.getName(),admin);
-            }
-            onGetDataListener.onSuccess(dataSnapshot,0.0,"");
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            System.out.print(databaseError.getMessage());
-            onGetDataListener.onFailure();
-        }
-    };
-    adminsRef.addListenerForSingleValueEvent(valueEventListener3);
+//    DatabaseReference rootRef3 = FirebaseDatabase.getInstance().getReference();
+//    DatabaseReference adminsRef = rootRef3.child("admins");
+//    ValueEventListener valueEventListener3 = new ValueEventListener() {
+//        @Override
+//        public void onDataChange(DataSnapshot dataSnapshot) {
+//            for(DataSnapshot ds : dataSnapshot.getChildren()) {
+//                Admin admin = ds.getValue(Admin.class);
+//                h3.put(admin.getName(),admin);
+//            }
+//            onGetDataListener.onSuccess(dataSnapshot,0.0,"");
+//        }
+//
+//        @Override
+//        public void onCancelled(@NonNull DatabaseError databaseError) {
+//            System.out.print(databaseError.getMessage());
+//            onGetDataListener.onFailure();
+//        }
+//    };
+//    adminsRef.addListenerForSingleValueEvent(valueEventListener3);
 
     }
 

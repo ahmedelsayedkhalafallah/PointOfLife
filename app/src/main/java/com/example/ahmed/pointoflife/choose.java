@@ -16,8 +16,10 @@ public class choose extends AppCompatActivity {
         id = intent.getStringExtra("id");
     }
 
-    public void openMap(View view) {
-
+    public void openDonation(View view) {
+        Intent intent = new Intent(choose.this,MainActivity.class);
+        intent.putExtra("id",id);
+        startActivity(intent);
     }
 
     public void openReport(View view) {
