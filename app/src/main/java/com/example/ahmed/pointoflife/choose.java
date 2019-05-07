@@ -7,24 +7,27 @@ import android.view.View;
 
 public class choose extends AppCompatActivity {
 
-    String id;
+    String id,campaignId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose);
         Intent intent = getIntent();
-        id = intent.getStringExtra("id");
+        id = intent.getStringExtra("carID");
+        campaignId = intent.getStringExtra("CampaignID");
     }
 
     public void openDonation(View view) {
         Intent intent = new Intent(choose.this,MainActivity.class);
         intent.putExtra("id",id);
+        intent.putExtra("CampaignID",campaignId);
         startActivity(intent);
     }
 
     public void openReport(View view) {
         Intent intent = new Intent(choose.this,HospitalView.class);
         intent.putExtra("id",id);
+        intent.putExtra("CampaignID", campaignId);
         startActivity(intent);
     }
 //        s=(Spinner)findViewById(R.id.spinner1);

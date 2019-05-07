@@ -1,5 +1,6 @@
 package com.example.ahmed.pointoflife;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,22 +16,29 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LogIn extends AppCompatActivity {
 
-    DatabaseReference mRoot;
+    DatabaseReference mRoot,campaignIdRoot;
     Map<String,Car> h;
+    boolean campaignIdFound = false;
 //    Map<String,Hospital> h2;
 //    Map<String,Admin> h3;
     EditText name,password,campaignNumber;
-    String Id,Pass,CNum;
+    String Id,Pass,CNumber,campaignDate,currentDate;
     Button login;
+    ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
+        currentDate = getDate();
+        mProgressDialog = new ProgressDialog(this);
 
         h = new HashMap<String, Car>();
 //        h2 = new HashMap<String, Hospital>();
@@ -43,22 +51,44 @@ public class LogIn extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                mProgressDialog.show();
         Id = name.getText().toString();
         Pass = password.getText().toString();
-        CNum = campaignNumber.getText().toString();
+        CNumber = campaignNumber.getText().toString();
+        if(CNumber.length() == 0){
+            CNumber="x";
+        }
 
                 getValues(new OnGetDataListener(){
                     @Override
-                    public void onSuccess(DataSnapshot dataSnapshot, double value, String counter) {
+                    public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                        mProgressDialog.dismiss();
                         if(!(h.isEmpty())){
                             if(h.containsKey(Id)) {
                                 if (Pass.equals(String.valueOf(h.get(Id).getPassword()))) {
-
-                                    Intent intent = new Intent(LogIn.this, choose.class);
-                                    intent.putExtra("carID", h.get(Id).getId().toString());
-                                    intent.putExtra("CampaignID", h.get(Id).getHospital().toString());
-                                    startActivity(intent);
+                                    if(CNumber != "x") {
+                                        if (campaignIdFound){
+                                            if(campaignDate.equals(currentDate)) {
+                                                DatabaseReference mRoot = FirebaseDatabase.getInstance().getReference().child("campaigns").child(CNumber).child("logs");
+                                                mRoot.child(getLogTime()).setValue(Id);
+                                                campaignIdFound = false;
+                                                Intent intent = new Intent(LogIn.this, choose.class);
+                                                intent.putExtra("carID", h.get(Id).getId().toString());
+                                                intent.putExtra("CampaignID", String.valueOf(CNumber));
+                                                startActivity(intent);
+                                            }
+                                            else{
+                                                Toast.makeText(LogIn.this, "This campaign has ended", Toast.LENGTH_SHORT).show();
+                                            }
+                                    }
+                                    else{
+                                            Toast.makeText(LogIn.this, "Wrong Campaign number", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Toast.makeText(LogIn.this, "Please enter your campaign number", Toast.LENGTH_SHORT).show();
+                                    }
                                 }
                                 else {
                                     Toast.makeText(LogIn.this, "wrong password", Toast.LENGTH_SHORT).show();
@@ -173,11 +203,22 @@ public class LogIn extends AppCompatActivity {
 //                    }
 //                });
 
-    }
+
+            }
 });
     }
+    String getDate(){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String currentDateandTime = sdf.format(new Date());
+        return currentDateandTime;
+    }
+    String getLogTime(){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy-kk-mm-ss-SSS");
+        String currentDateandTime = sdf.format(new Date());
+        return currentDateandTime;
+    }
 void getValues(final OnGetDataListener onGetDataListener){
-        onGetDataListener.onStart();
+    onGetDataListener.onStart();
     DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
     DatabaseReference carsRef = rootRef.child("cars");
     ValueEventListener valueEventListener = new ValueEventListener() {
@@ -187,6 +228,7 @@ void getValues(final OnGetDataListener onGetDataListener){
                 Car car = ds.getValue(Car.class);
                 h.put(car.getId().toString(),car);
             }
+
         }
 
         @Override
@@ -194,6 +236,28 @@ void getValues(final OnGetDataListener onGetDataListener){
             System.out.print(databaseError.getMessage());}
     };
     carsRef.addListenerForSingleValueEvent(valueEventListener);
+
+    DatabaseReference cIdRef = rootRef.child("campaigns").child(CNumber).child("date");
+    ValueEventListener valueEventListener1 = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            if(dataSnapshot.getValue() != null) {
+                String s = dataSnapshot.getValue(String.class);
+                if (s.length() == 10) {
+                    campaignIdFound = true;
+                    campaignDate = s;
+                }
+            }
+            onGetDataListener.onSuccess(dataSnapshot,0,"");
+
+            }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+    cIdRef.addListenerForSingleValueEvent(valueEventListener1);
 
 //    DatabaseReference rootRef2 = FirebaseDatabase.getInstance().getReference();
 //    DatabaseReference hospitalsRef = rootRef2.child("hospitals");

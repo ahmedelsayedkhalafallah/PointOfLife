@@ -4,7 +4,7 @@
     tools:context=".MainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA"
+    android:background="#E3F2FD"
     android:orientation="vertical">
 
 
@@ -33,6 +33,9 @@
             android:drawableLeft="@mipmap/mm"
             android:paddingLeft="30dp"
             android:textColor="@android:color/black"
+            android:text=""
+            android:lines="1"
+            android:singleLine="true"
             android:maxLines="1"
             android:inputType="number"
             />
@@ -56,6 +59,8 @@
             android:drawableLeft="@mipmap/mm"
             android:paddingLeft="30dp"
             android:textColor="@android:color/black"
+            android:lines="1"
+            android:singleLine="true"
             android:maxLines="1"
             />
     </LinearLayout>
@@ -78,6 +83,9 @@
             android:drawableLeft="@mipmap/lock3"
             android:textColor="@android:color/black"
             android:inputType="textPassword"
+            android:lines="1"
+            android:singleLine="true"
+            android:maxLines="1"
             />
     </LinearLayout>
 
@@ -86,6 +94,7 @@
     <Button
         android:layout_width="140dp"
         android:layout_height="54dp"
+        android:id="@+id/login"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="25dp"
         android:background="@drawable/draw6"

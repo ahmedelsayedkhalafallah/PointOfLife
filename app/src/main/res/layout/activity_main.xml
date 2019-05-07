@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:background="#E3F2FD">
 
     <TabHost
         android:id="@+id/tabhost"
@@ -64,6 +64,8 @@
                                 android:hint="   ##############"
                                 android:paddingLeft="20dp"
                                 android:textColor="@android:color/black"
+                                android:lines="1"
+                                android:singleLine="true"
                                 android:maxLines="1"
                                 android:maxLength="14"
                                 android:inputType="numberDecimal"/>
@@ -77,12 +79,13 @@
                                 android:text="Check it"
                                 android:onClick="check"
                                 android:textAllCaps="false"
-                                android:textColor="@android:color/black"
+                                android:textColor="@android:color/white"
                                 android:textSize="20dp" />
 
                             <ImageView
                                 android:layout_width="80dp"
                                 android:layout_height="50dp"
+                                android:id="@+id/checkImage"
                                 android:layout_gravity="center_horizontal"
                                 android:layout_marginTop="25dp"
                                 android:src="@mipmap/grlamp" />
@@ -120,6 +123,8 @@
                                 android:hint="   User Name"
                                 android:paddingLeft="20dp"
                                 android:textColor="@android:color/black"
+                                android:lines="1"
+                                android:singleLine="true"
                                 android:maxLines="1"/>
 
                             <EditText
@@ -132,6 +137,8 @@
                                 android:hint="   ID"
                                 android:paddingLeft="20dp"
                                 android:textColor="@android:color/black"
+                                android:lines="1"
+                                android:singleLine="true"
                                 android:maxLines="1"
                                 android:maxLength="14"
                                 android:inputType="numberDecimal"/>
@@ -258,6 +265,12 @@
                                 android:hint="   History of Diseases"
                                 android:paddingLeft="20dp"
                                 android:textColor="@android:color/black" />
+                            <CheckBox
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Allow points donation"
+                                android:onClick="onCheckboxClicked"
+                                android:layout_gravity="center_horizontal"/>
 
                             <Button
                                 android:layout_width="wrap_content"
@@ -267,7 +280,7 @@
                                 android:background="@drawable/draw6"
                                 android:text="Enter"
                                 android:onClick="add"
-                                android:textColor="@android:color/black" />
+                                android:textColor="@android:color/white" />
 
                         </LinearLayout>
                     </ScrollView>
@@ -476,16 +489,9 @@
 
                             </LinearLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center_horizontal"
-                                android:layout_marginTop="8dp"
-                                android:text="Last Donation Period "
-                                android:textColor="@android:color/black"
-                                android:textSize="15dp" />
 
-                            <LinearLayout
+
+                            <!--<LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="35dp"
                                 android:layout_marginLeft="20dp"
@@ -542,7 +548,14 @@
                                     android:textSize="15dp" />
 
 
+                            </LinearLayout> -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="56dp">
+
                             </LinearLayout>
+
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -565,25 +578,63 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Blood Amount" />
+                                        android:text="Blood Amount    " />
 
-                                    <EditText
-                                        android:id="@+id/amount"
-                                        android:inputType="numberDecimal"
-                                        android:text="500"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content" />
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+
+                                        android:orientation="horizontal">
+
+                                        <Button
+                                            android:layout_width="30dp"
+                                            android:layout_height="30dp"
+                                            android:layout_gravity="center_horizontal"
+                                            android:background="@drawable/draw6"
+                                            android:text="-"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="20dp"
+                                            android:layout_marginBottom="10dp"
+                                            android:onClick="decrease"/>
+
+                                        <EditText
+                                            android:id="@+id/amount"
+                                            android:inputType="numberDecimal"
+                                            android:text="500"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:enabled="false"/>
+
+                                        <Button
+                                            android:layout_width="30dp"
+                                            android:layout_height="30dp"
+                                            android:layout_gravity="center_horizontal"
+                                            android:background="@drawable/draw6"
+                                            android:text="+"
+                                            android:textColor="@android:color/white"
+                                            android:textSize="20dp"
+                                            android:layout_marginBottom="10dp"
+                                            android:onClick="increase"
+                                            />
+                                    </LinearLayout>
+
                                 </LinearLayout>
 
-                            </LinearLayout>
 
+                            </LinearLayout>
+                            <CheckBox android:id="@+id/checkbox_donate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Allow points donation"
+                                android:onClick="onCheckboxClicked"
+                                android:layout_gravity="center_horizontal"/>
                             <Button
                                 android:layout_width="120dp"
                                 android:layout_height="30dp"
                                 android:layout_gravity="center_horizontal"
                                 android:background="@drawable/draw6"
                                 android:text="Done"
-                                android:textColor="@android:color/black"
+                                android:textColor="@android:color/white"
                                 android:textSize="20dp"
                                 android:layout_marginBottom="10dp"
                                 android:onClick="addDonation"/>

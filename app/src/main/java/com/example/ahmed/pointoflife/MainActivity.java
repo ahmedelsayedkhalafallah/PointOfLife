@@ -1,9 +1,16 @@
 package com.example.ahmed.pointoflife;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,6 +20,11 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,27 +38,59 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    DatabaseReference mRoot, mRootC,mRootBC, mRootH,mRootBCH;
-    HashMap<String,Donator> h = new HashMap<String, Donator>();
+    DatabaseReference mRoot, mRootC, mRootBC, mRootH, mRootBCH;
+    HashMap<String, Donator> h = new HashMap<String, Donator>();
     EditText id;
     String idS;
     TabHost tab;
     ImageView imageView;
-    EditText name, address, age,phone, type,nid,amount;
-    TextView Sid,Sname, Saddress,Sage,Sphone,Stype,Sdonations,Syear,Smonth,Sday;
-    String carId,hospitalId,ttype;
-    double quantity;
-    boolean valueFound = false;
+    EditText name, address, age, phone, type, nid, amount;
+    TextView Sid, Sname, Saddress, Sage, Sphone, Stype, Sdonations;
+    String carId, hospitalId, ttype = "", campaignId,nameS, addressS, ageS, phoneS, typeS, nidS;
+    int quantity = 500,lastTypeQuantity = 0;
+    boolean valueFound = false, pointsDonationAgreement = false;
+    TabHost tabHost;
+    private static final int PERMISSIONS_REQUEST = 100;
+    ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = getIntent();
+        mProgressDialog = new ProgressDialog(this);
 
+        Intent intent = getIntent();
+        tabHost = (TabHost) findViewById(R.id.tabhost);
+
+
+
+//Check whether GPS tracking is enabled//
+
+        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            finish();
+        }
+
+//Check whether this app has access to the location permission//
+
+        int permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+//If the location permission has been granted, then start the TrackerService//
+
+        if (permission == PackageManager.PERMISSION_GRANTED) {
+        } else {
+
+//If the app doesn’t currently have access to the user’s location, then request access//
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST);
+        }
 
 
         carId = intent.getStringExtra("carID");
-        hospitalId = intent.getStringExtra("HospitalID");
+        campaignId = intent.getStringExtra("CampaignID");
 
         final ImageView ap = (ImageView) findViewById(R.id.ap);
         final ImageView am = (ImageView) findViewById(R.id.am);
@@ -58,13 +102,12 @@ public class MainActivity extends AppCompatActivity {
         final ImageView om = (ImageView) findViewById(R.id.om);
 
 
-
         name = findViewById(R.id.name);
         address = findViewById(R.id.address);
         age = findViewById(R.id.age);
         phone = findViewById(R.id.phone);
         nid = findViewById(R.id.nid);
-        Stype= findViewById(R.id.dType);
+        Stype = findViewById(R.id.dType);
         tab = (TabHost) findViewById(R.id.tabhost);
         tab.setup();
 
@@ -388,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        imageView = findViewById(R.id.pic);
+        imageView = findViewById(R.id.checkImage);
         id = findViewById(R.id.id);
         mRoot = FirebaseDatabase.getInstance().getReference().child("donators");
         Sname = findViewById(R.id.dName);
@@ -397,122 +440,199 @@ public class MainActivity extends AppCompatActivity {
         Sdonations = findViewById(R.id.dDonations);
         Sphone = findViewById(R.id.dPhone);
         Saddress = findViewById(R.id.dAddress);
-        Syear = findViewById(R.id.year);
-        Smonth = findViewById(R.id.months);
-        Sday = findViewById(R.id.day);
+
 
 
         amount = findViewById(R.id.amount);
     }
 
-    public void check(View view){
+    public void check(View view) {
 
         idS = id.getText().toString();
+        if (idS.length() < 14) {
+            Toast.makeText(this, "Please enter valid ID number", Toast.LENGTH_SHORT).show();
+        } else {
+            mProgressDialog.show();
 
-        mRoot.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    Donator donator = postSnapshot.getValue(Donator.class);
-                    h.put(donator.getId(),donator);
-                }
+            mRoot.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                        Donator donator = postSnapshot.getValue(Donator.class);
+                        h.put(donator.getId(), donator);
+                    }
 
-                if(h.isEmpty()){
-                    Toast.makeText(MainActivity.this,"No donators registered", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    if(h.containsKey(idS)){
+                    if (h.isEmpty()) {
+                        Toast.makeText(MainActivity.this, "No donators registered", Toast.LENGTH_SHORT).show();
+                    } else {
+                        if (h.containsKey(idS)) {
 
 
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-                        String currentDateandTime = sdf.format(new Date());
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                            String currentDateandTime = sdf.format(new Date());
 
-                        try {
-                            Date date1;
-                            Date date2;
+                            try {
+                                Date date1;
+                                Date date2;
 
-                            SimpleDateFormat dates = new SimpleDateFormat("dd-MM-yyyy");
+                                SimpleDateFormat dates = new SimpleDateFormat("dd-MM-yyyy");
 
-                            //Setting dates
-                            date1 = dates.parse(currentDateandTime);
-                            date2 = dates.parse(h.get(idS).getDate());
+                                //Setting dates
+                                date1 = dates.parse(currentDateandTime);
+                                date2 = dates.parse(h.get(idS).getDate());
 
-                            //Comparing dates
-                            long difference = Math.abs(date1.getTime() - date2.getTime());
-                            long differenceDates = difference / (24 * 60 * 60 * 1000);
+                                //Comparing dates
+                                long difference = Math.abs(date1.getTime() - date2.getTime());
+                                long differenceDates = difference / (24 * 60 * 60 * 1000);
 
-                            //Convert long to String
-                            String dayDifference = Long.toString(differenceDates);
-                            if(differenceDates < 60){
-                                imageView.setImageResource(R.drawable.rlamp);
-                                Toast.makeText(MainActivity.this, "Not allowed", Toast.LENGTH_SHORT).show();
+                                //Convert long to String
+                                String dayDifference = Long.toString(differenceDates);
+                                if (differenceDates < 60) {
+                                    imageView.setImageResource(R.drawable.rlamp);
+                                    Toast.makeText(MainActivity.this, "Not allowed", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    String datesS = dates.format(new Date(date1.getTime() - date2.getTime()));
+                                    tabHost.setCurrentTab(2);
+
+                                    Sname.setText(h.get(idS).getName());
+                                    Stype.setText(h.get(idS).getType());
+                                    Sid.setText(h.get(idS).getId());
+                                    Sphone.setText(h.get(idS).getPhone());
+                                    Saddress.setText(h.get(idS).getAddress());
+                                    Sdonations.setText(String.valueOf(h.get(idS).getDonations()));
+                                    Sage.setText(h.get(Sid).getAge());
+                                }
+                                mProgressDialog.dismiss();
+
+                            } catch (Exception e) {
+
                             }
-                            else{
-                                String datesS = dates.format(new Date(date1.getTime()-date2.getTime()));
-                                TabHost tabHost =  (TabHost) findViewById(R.id.tabhost);
-                                tabHost.setCurrentTab(2);
 
-                                Sname.setText(h.get(idS).getName());
-                                Stype.setText(h.get(idS).getType());
-                                Sid.setText(h.get(idS).getId());
-                                Sphone.setText(h.get(idS).getPhone());
-                                Saddress.setText(h.get(idS).getAddress());
-                                Sdonations.setText(String.valueOf(h.get(idS).getDonations()));
-                                Sday.setText((dayDifference));
-                                Smonth.setText(h.get(Sid).getDate().substring(3,4));
-                                Syear.setText(h.get(Sid).getDate().substring(6));
-                                Sage.setText(h.get(Sid).getAge());
 
-                            }
+                        } else {
+                            mProgressDialog.dismiss();
+                            tabHost.setCurrentTab(1);
+                            nid.setText(idS);
                         }
-                        catch (Exception e){
-
-                        }
-
-
-                        }
-                    else{
-                        TabHost tabHost =  (TabHost) findViewById(R.id.tabhost);
-                        tabHost.setCurrentTab(1);
-                        }
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
+
     public void add(View view) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         String currentDateandTime = sdf.format(new Date());
 
 
-        String nameS,addressS,ageS,phoneS,typeS,nidS;
+
         nameS = name.getText().toString();
         addressS = address.getText().toString();
         ageS = age.getText().toString();
         phoneS = phone.getText().toString();
         typeS = ttype;
         nidS = nid.getText().toString();
+        if (nameS.isEmpty()) {
+            Toast.makeText(this, "Please enter donator name", Toast.LENGTH_SHORT).show();
+        } else if (addressS.isEmpty()) {
+            Toast.makeText(this, "Please enter donator address", Toast.LENGTH_SHORT).show();
+        } else if (ageS.isEmpty()) {
+            Toast.makeText(this, "Please enter donator age", Toast.LENGTH_SHORT).show();
+        } else if (phoneS.isEmpty()) {
+            Toast.makeText(this, "Please enter donator phone", Toast.LENGTH_SHORT).show();
+        } else if (ttype.isEmpty()) {
+            Toast.makeText(this, "Please choose donator blood type", Toast.LENGTH_SHORT).show();
+        } else if (nidS.isEmpty()) {
+            Toast.makeText(this, "Please enter donator ID number", Toast.LENGTH_SHORT).show();
+        } else {
+mProgressDialog.show();
+            DatabaseReference mRoot = FirebaseDatabase.getInstance().getReference().child("donators").child(nidS);
+            mRoot.child("name").setValue(nameS);
+            mRoot.child("address").setValue(addressS);
+            mRoot.child("age").setValue(ageS);
+            mRoot.child("phone").setValue(phoneS);
+            mRoot.child("type").setValue(typeS);
+            mRoot.child("id").setValue(nidS);
+            mRoot.child("date").setValue(currentDateandTime);
+            mRoot.child("donations").setValue(1);
+            if(pointsDonationAgreement){
+                mRoot.child("sharedPoints").setValue(quantity);
+                mRoot.child("points").setValue(0);
+            }
+            else{
+                mRoot.child("points").setValue(quantity);
+                mRoot.child("sharedPoints").setValue(0);
+            }
+            mRoot.child("donationAgreement").setValue(pointsDonationAgreement);
+            final DatabaseReference mAddDonator = FirebaseDatabase.getInstance().getReference().child("campaigns").child(campaignId);
+            mAddDonator.child("donators").child(nidS).setValue(quantity);
+            requestLocationUpdates();
+            DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference recordForTypeRef = rootRef.child("campaigns").child(campaignId).child("records").child(typeS);
+            getTypeValue(recordForTypeRef,new OnGetDataListener() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                    mAddDonator.child("records").child(typeS).setValue(value+quantity);
+                }
 
-        DatabaseReference mRoot = FirebaseDatabase.getInstance().getReference().child("donators").child(nidS);
-        mRoot.child("name").setValue(nameS);
-        mRoot.child("address").setValue(addressS);
-        mRoot.child("age").setValue(ageS);
-        mRoot.child("phone").setValue(phoneS);
-        mRoot.child("type").setValue(typeS);
-        mRoot.child("id").setValue(nidS);
-        mRoot.child("date").setValue(currentDateandTime);
-        mRoot.child("donations").setValue(0.0);
+                @Override
+                public void onStart() {
 
-        TabHost tabHost =  (TabHost) findViewById(R.id.tabhost);
-        tabHost.setCurrentTab(2);
+                }
 
-          }
+                @Override
+                public void onFailure() {
+
+                }
+            });
+            DatabaseReference totalRef = rootRef.child("campaigns").child(campaignId).child("records").child("total");
+            getTypeValue(totalRef, new OnGetDataListener() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                    mAddDonator.child("records").child("total").setValue(value+quantity);
+
+                }
+
+                @Override
+                public void onStart() {
+
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+            });
+            DatabaseReference counterRef = rootRef.child("campaigns").child(campaignId).child("records").child("counter");
+            getTypeValue(counterRef, new OnGetDataListener() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                    mAddDonator.child("records").child("counter").setValue(value+1);
+mProgressDialog.dismiss();
+                }
+
+                @Override
+                public void onStart() {
+
+                }
+
+                @Override
+                public void onFailure() {
+
+                }
+            });
+            //            tabHost.setCurrentTab(0);
+
+            finish();
+            startActivity(getIntent());
+        }
+    }
 
 //          void sendLocation(String Lat, String Long){
 //              firebase.auth().onAuthStateChanged(function(user) {
@@ -550,13 +670,11 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
 
-
-String getDate(){
-    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-    String currentDateandTime = sdf.format(new Date());
-    return currentDateandTime;
-}
-
+    String getDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String currentDateandTime = sdf.format(new Date());
+        return currentDateandTime;
+    }
 
 
 //void addBlood( ){
@@ -704,309 +822,476 @@ String getDate(){
 //}
 
 
-void addDonations(String type,double value){
-        //add donation to th car
-        //increase bags number
-    addB(type,"bags",1.0,new OnGetDataListener() {
-        @Override
-        public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
-
-
-                mRootC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        double count = dataSnapshot.getValue(double.class);
-                        count+= value;
-                        mRootC.child(counter).setValue(count);
-                        valueFound = false;
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-                mRootBC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            double count = dataSnapshot.getValue(double.class);
-                            count += value;
-                            mRootBC.child(counter).setValue(count);
-                            valueFound = false;
-                        }
-                        else {
-                            mRootBC.child(counter).setValue(value);
-                        }
-                    }
-
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-
-
-        }
-
-        @Override
-        public void onStart() {
-
-        }
-
-        @Override
-        public void onFailure() {
-
-        }
-    });
-
-    //increase litres quantity
-    addB(type,"litres",value,new OnGetDataListener() {
-        @Override
-        public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
-
-
-                mRootC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        double count = dataSnapshot.getValue(double.class);
-                        count+= value;
-                        mRootC.child(counter).setValue(count);
-
-                    valueFound = false;
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-            mRootBC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        double count = dataSnapshot.getValue(double.class);
-                        count += value;
-                        mRootBC.child(counter).setValue(count);
-                        valueFound = false;
-                    }
-                    else {
-                        mRootBC.child(counter).setValue(value);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
-        }
-
-        @Override
-        public void onStart() {
-
-        }
-
-        @Override
-        public void onFailure() {
-
-        }
-    });
-
-
-}
-
-    void addDonationstoHospitals(String type,double value){
-        //add donation to th car
-        //increase bags number
-        addBtoHospital(type,"bags",1.0,new OnGetDataListener() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
-
-
-                mRootH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        double count = dataSnapshot.getValue(double.class);
-                        count+= value;
-                        mRootH.child(counter).setValue(count);
-                        valueFound = false;
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-                mRootBCH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            double count = dataSnapshot.getValue(double.class);
-                            count += value;
-                            mRootBCH.child(counter).setValue(count);
-                            valueFound = false;
-                        }
-                        else {
-                            mRootBCH.child(counter).setValue(value);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-
-
-            }
-
-            @Override
-            public void onStart() {
-
-            }
-
-            @Override
-            public void onFailure() {
-
-            }
-        });
-
-        //increase litres quantity
-        addBtoHospital(type,"litres",value,new OnGetDataListener() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
-
-
-                mRootH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        double count = dataSnapshot.getValue(double.class);
-                        count+= value;
-                        mRootH.child(counter).setValue(count);
-
-                        valueFound = false;
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-                mRootBCH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            double count = dataSnapshot.getValue(double.class);
-                            count += value;
-                            mRootBCH.child(counter).setValue(count);
-                            valueFound = false;
-                        }
-                        else {
-                            mRootBCH.child(counter).setValue(value);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-            }
-
-            @Override
-            public void onStart() {
-
-            }
-
-            @Override
-            public void onFailure() {
-
-            }
-        });
-
-
-    }
-
-void addB(  final String type, final String counter, final double value, final OnGetDataListener listener)  {
-
-
-
-        mRootC = FirebaseDatabase.getInstance().getReference().child("cars").child(carId).child(type);
-    mRootBC = FirebaseDatabase.getInstance().getReference().child("cars").child(carId).child("records").child(getDate()).child(type);
-    listener.onStart();
-    mRootC.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-         if(dataSnapshot.child(counter).exists()){
-             Toast.makeText(MainActivity.this, "value found", Toast.LENGTH_SHORT).show();
-             listener.onSuccess(dataSnapshot, value,counter);
-         }
-         else {
-             Toast.makeText(MainActivity.this, "value not found", Toast.LENGTH_SHORT).show();
-             mRootC.child(counter).setValue(value);
-             mRootBC.child(counter).setValue(value);
-
-         }
-
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            listener.onFailure();
-        }
-    });
-
-    }
-
-    void addBtoHospital(  final String type, final String counter, final double value, final OnGetDataListener listener)  {
-
-
-
-        mRootH = FirebaseDatabase.getInstance().getReference().child("hospitals").child(hospitalId).child(type);
-        mRootBCH = FirebaseDatabase.getInstance().getReference().child("hospitals").child(hospitalId).child("records").child(getDate()).child(type);
-        listener.onStart();
-        mRootH.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.child(counter).exists()){
-                    Toast.makeText(MainActivity.this, "value found", Toast.LENGTH_SHORT).show();
-                    listener.onSuccess(dataSnapshot, value,counter);
-                }
-                else {
-                    Toast.makeText(MainActivity.this, "value not found", Toast.LENGTH_SHORT).show();
-                    mRootH.child(counter).setValue(value);
-                    mRootBCH.child(counter).setValue(value);
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                listener.onFailure();
-            }
-        });
-
-    }
+//    void addDonations(String type, double value) {
+//        //add donation to th car
+//        //increase bags number
+//        addB(type, "bags", 1.0, new OnGetDataListener() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
+//
+//
+//                mRootC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        double count = dataSnapshot.getValue(double.class);
+//                        count += value;
+//                        mRootC.child(counter).setValue(count);
+//                        valueFound = false;
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//                mRootBC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        if (dataSnapshot.exists()) {
+//                            double count = dataSnapshot.getValue(double.class);
+//                            count += value;
+//                            mRootBC.child(counter).setValue(count);
+//                            valueFound = false;
+//                        } else {
+//                            mRootBC.child(counter).setValue(value);
+//                        }
+//                    }
+//
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//
+//            }
+//
+//            @Override
+//            public void onStart() {
+//
+//            }
+//
+//            @Override
+//            public void onFailure() {
+//
+//            }
+//        });
+//
+//        //increase litres quantity
+//        addB(type, "litres", value, new OnGetDataListener() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
+//
+//
+//                mRootC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        double count = dataSnapshot.getValue(double.class);
+//                        count += value;
+//                        mRootC.child(counter).setValue(count);
+//
+//                        valueFound = false;
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//                mRootBC.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        if (dataSnapshot.exists()) {
+//                            double count = dataSnapshot.getValue(double.class);
+//                            count += value;
+//                            mRootBC.child(counter).setValue(count);
+//                            valueFound = false;
+//                        } else {
+//                            mRootBC.child(counter).setValue(value);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//            }
+//
+//            @Override
+//            public void onStart() {
+//
+//            }
+//
+//            @Override
+//            public void onFailure() {
+//
+//            }
+//        });
+//
+//
+//    }
+
+//    void addDonationstoHospitals(String type, double value) {
+//        //add donation to th car
+//        //increase bags number
+//        addBtoHospital(type, "bags", 1.0, new OnGetDataListener() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
+//
+//
+//                mRootH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        double count = dataSnapshot.getValue(double.class);
+//                        count += value;
+//                        mRootH.child(counter).setValue(count);
+//                        valueFound = false;
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//                mRootBCH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        if (dataSnapshot.exists()) {
+//                            double count = dataSnapshot.getValue(double.class);
+//                            count += value;
+//                            mRootBCH.child(counter).setValue(count);
+//                            valueFound = false;
+//                        } else {
+//                            mRootBCH.child(counter).setValue(value);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//
+//            }
+//
+//            @Override
+//            public void onStart() {
+//
+//            }
+//
+//            @Override
+//            public void onFailure() {
+//
+//            }
+//        });
+//
+//        //increase litres quantity
+//        addBtoHospital(type, "litres", value, new OnGetDataListener() {
+//            @Override
+//            public void onSuccess(DataSnapshot dataSnapshot, final double value, final String counter) {
+//
+//
+//                mRootH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        double count = dataSnapshot.getValue(double.class);
+//                        count += value;
+//                        mRootH.child(counter).setValue(count);
+//
+//                        valueFound = false;
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//                mRootBCH.child(counter).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        if (dataSnapshot.exists()) {
+//                            double count = dataSnapshot.getValue(double.class);
+//                            count += value;
+//                            mRootBCH.child(counter).setValue(count);
+//                            valueFound = false;
+//                        } else {
+//                            mRootBCH.child(counter).setValue(value);
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//
+//            }
+//
+//            @Override
+//            public void onStart() {
+//
+//            }
+//
+//            @Override
+//            public void onFailure() {
+//
+//            }
+//        });
+//
+//
+//    }
+
+//    void addB(final String type, final String counter, final double value, final OnGetDataListener listener) {
+//
+//
+//        mRootC = FirebaseDatabase.getInstance().getReference().child("cars").child(carId).child(type);
+//        mRootBC = FirebaseDatabase.getInstance().getReference().child("cars").child(carId).child("records").child(getDate()).child(type);
+//        listener.onStart();
+//        mRootC.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.child(counter).exists()) {
+//                    Toast.makeText(MainActivity.this, "value found", Toast.LENGTH_SHORT).show();
+//                    listener.onSuccess(dataSnapshot, value, counter);
+//                } else {
+//                    Toast.makeText(MainActivity.this, "value not found", Toast.LENGTH_SHORT).show();
+//                    mRootC.child(counter).setValue(value);
+//                    mRootBC.child(counter).setValue(value);
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//                listener.onFailure();
+//            }
+//        });
+//
+//    }
+//
+//    void addBtoHospital(final String type, final String counter, final double value, final OnGetDataListener listener) {
+//
+//
+//        mRootH = FirebaseDatabase.getInstance().getReference().child("hospitals").child(hospitalId).child(type);
+//        mRootBCH = FirebaseDatabase.getInstance().getReference().child("hospitals").child(hospitalId).child("records").child(getDate()).child(type);
+//        listener.onStart();
+//        mRootH.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.child(counter).exists()) {
+//                    Toast.makeText(MainActivity.this, "value found", Toast.LENGTH_SHORT).show();
+//                    listener.onSuccess(dataSnapshot, value, counter);
+//                } else {
+//                    Toast.makeText(MainActivity.this, "value not found", Toast.LENGTH_SHORT).show();
+//                    mRootH.child(counter).setValue(value);
+//                    mRootBCH.child(counter).setValue(value);
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//                listener.onFailure();
+//            }
+//        });
+//
+//    }
 
 
     public void addDonation(View view) {
         String input = amount.getText().toString();
-        double a =  Double.parseDouble(input);
-        String Type = Stype.getText().toString();
-        addDonations(Type,a);
-        addDonationstoHospitals(Type,a);
+        int a = Integer.parseInt(input);
+        quantity = a;
+mProgressDialog.show();
+        final DatabaseReference mAddDonator = FirebaseDatabase.getInstance().getReference().child("campaigns").child(campaignId);
+        mAddDonator.child("donators").child(Sid.getText().toString()).setValue(quantity);
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference recordForTypeRef = rootRef.child("campaigns").child(campaignId).child("records").child(Stype.getText().toString());
+
+        getTypeValue(recordForTypeRef,new OnGetDataListener() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                mAddDonator.child("records").child(Stype.getText().toString()).setValue(value+quantity);
+
+            }
+
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
+        final DatabaseReference donatorPointsRef ;
+        if(pointsDonationAgreement){
+            donatorPointsRef = rootRef.child("donators").child(Sid.getText().toString()).child("sharedPoints");
+        }
+        else{
+            donatorPointsRef = rootRef.child("donators").child(Sid.getText().toString()).child("points");
+        }
+
+        getTypeValue(donatorPointsRef, new OnGetDataListener() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                donatorPointsRef.setValue(quantity+value);
+            }
+
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
+        DatabaseReference totalRef = rootRef.child("campaigns").child(campaignId).child("records").child("total");
+        getTypeValue(totalRef, new OnGetDataListener() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                mAddDonator.child("records").child("total").setValue(value+quantity);
+
+            }
+
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
+        DatabaseReference counterRef = rootRef.child("campaigns").child(campaignId).child("records").child("counter");
+        getTypeValue(counterRef, new OnGetDataListener() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                mAddDonator.child("records").child("counter").setValue(value+1);
+mProgressDialog.dismiss();
+            }
+
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
+        requestLocationUpdates();
+        DatabaseReference donatorRef = rootRef.child("donators").child(Sid.getText().toString()).child("date");
+        donatorRef.setValue(getDate());
+        finish();
+        startActivity(getIntent());
+//        addDonations(Type, a);
+//        addDonationstoHospitals(Type, a);
+
     }
 
-}
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[]
+            grantResults) {
+
+//If the permission has been granted...//
+
+        if (requestCode == PERMISSIONS_REQUEST && grantResults.length == 1
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+//...then start the GPS tracking service//
+        }
+        else {
+
+//If the user denies the permission request, then display a toast with some more information//
+
+            Toast.makeText(this, "Please enable location services to allow GPS tracking", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private void requestLocationUpdates() {
+        LocationRequest request = new LocationRequest();
+
+//Specify how often your app should request the device’s location//
+
+        request.setInterval(10000);
+
+//Get the most accurate location data available//
+
+        request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
+        int permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+//If the app currently has access to the location permission...//
+
+        if (permission == PackageManager.PERMISSION_GRANTED) {
+
+//...then request location updates//
+
+            client.requestLocationUpdates(request, new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+
+//Get a reference to the database, so your app can perform read and write operations//
+
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("campaigns").child(campaignId);
+                    Location location = locationResult.getLastLocation();
+                    if (location != null) {
+
+//Save the location data to the database//
+
+                        ref.child("location").child("latitude").setValue(location.getLatitude());
+                        ref.child("location").child("longitude").setValue(location.getLongitude());
+                    }
+                }
+            }, null);
+        }
+    }
+    void getTypeValue(DatabaseReference oldRef,final OnGetDataListener onGetDataListener){
+        onGetDataListener.onStart();
+    ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                int lastValue = dataSnapshot.getValue(Integer.class);
+                onGetDataListener.onSuccess(dataSnapshot,lastValue,"");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.print(databaseError.getMessage());}
+        };
+        oldRef.addListenerForSingleValueEvent(valueEventListener);
+
+    }
+
+    public void increase(View view) {
+    }
+
+    public void decrease(View view) {
+    }
+
+    public void onCheckboxClicked(View view) {
+        if(pointsDonationAgreement) {
+            pointsDonationAgreement = false;
+        }
+        else{
+            pointsDonationAgreement = true;
+        }
+    }
+}

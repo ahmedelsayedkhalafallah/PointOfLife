@@ -1,5 +1,6 @@
 package com.example.ahmed.pointoflife;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,7 +9,6 @@ import android.support.v7.widget.CardView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -18,7 +18,14 @@ import com.google.firebase.database.ValueEventListener;
 
 public class HospitalView extends AppCompatActivity {
 
+    public CardView fCardView;
+    public CardView kCardView;
     boolean f = true;
+    String carId, campaignId;
+    TextView apb, anb, bpb, bnb, abpb, abnb, opb, onb,bbcount,bacount;
+    int finalValue;
+    //    Long apbs,apls,anbs,anls,bpbs,bpls,abpbs,abpls,abnbs,abnls,opbs,opls,onbs,onls;
+    DatabaseReference mRoot;
     private Button btnap;
     private Button btnan;
     private Button btnbp;
@@ -27,59 +34,41 @@ public class HospitalView extends AppCompatActivity {
     private Button btnabn;
     private Button btnop;
     private Button btnon;
-    public CardView fCardView;
-    public CardView kCardView;
-    String id;
-    TextView apb,apl,anb,anl,bpb,bpl,bnb,bnl,abpb,abpl,abnb,abnl,opb,opl,onb,onl;
-    Long apbs,apls,anbs,anls,bpbs,bpls,abpbs,abpls,abnbs,abnls,opbs,opls,onbs,onls;
-    DatabaseReference mRoot;
-    double value;
+    ProgressDialog mProgressDialog;
+//    double value;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hospital_view);
-
+        mProgressDialog = new ProgressDialog(this);
 
         Intent intent = getIntent();
-        id = intent.getStringExtra("id");
-        Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
+        carId = intent.getStringExtra("carID");
+        campaignId = intent.getStringExtra("CampaignID");
 
-
+bacount = findViewById(R.id.bloodamountcount);
+        bbcount = findViewById(R.id.bloodbagcount);
         apb = findViewById(R.id.apb);
-        apl = findViewById(R.id.apl);
+
         anb = findViewById(R.id.anb);
-        anl = findViewById(R.id.anl);
         bpb = findViewById(R.id.bpb);
-        bpl = findViewById(R.id.bpl);
         abpb = findViewById(R.id.abpb);
-        abpl = findViewById(R.id.abpl);
         abnb = findViewById(R.id.abnb);
-        abnl = findViewById(R.id.abnl);
         bnb = findViewById(R.id.bnb);
-        bnl = findViewById(R.id.bnl);
         opb = findViewById(R.id.opb);
-        opl = findViewById(R.id.opl);
         onb = findViewById(R.id.onb);
-        onl = findViewById(R.id.onl);
-
-
-        apb.setText(String.valueOf(getValue("A+","bags")));
-        apl.setText(String.valueOf(getValue("A+","litres")));
-        anb.setText(String.valueOf(getValue("A-","bags")));
-        anl.setText(String.valueOf(getValue("A-","litres")));
-        bpb.setText(String.valueOf(getValue("B+","bags")));
-        bpl.setText(String.valueOf(getValue("B+","litres")));
-        abpb.setText(String.valueOf(getValue("AB+","bags")));
-        abpl.setText(String.valueOf(getValue("AB+","litres")));
-        abnb.setText(String.valueOf(getValue("AB-","bags")));
-        abnl.setText(String.valueOf(getValue("AB-","litres")));
-        bnb.setText(String.valueOf(getValue("B-","bags")));
-        bnl.setText(String.valueOf(getValue("B-","litres")));
-        opb.setText(String.valueOf(getValue("O+","bags")));
-        opl.setText(String.valueOf(getValue("O+","litres")));
-        onb.setText(String.valueOf(getValue("O-","bags")));
-        onl.setText(String.valueOf(getValue("O-","litres")));
+        mProgressDialog.show();
+        getValue("A+");
+        getValue("A-");
+        getValue("B+");
+        getValue("AB+");
+        getValue("AB-");
+        getValue("B-");
+        getValue("O+");
+        getValue("O-");
+        getValue("total");
+        getValue("counter");
 
 
         btnap = (Button) findViewById(R.id.btnap_Button);
@@ -100,8 +89,6 @@ public class HospitalView extends AppCompatActivity {
         final CardView saCardView = (CardView) findViewById(R.id.saCardView);
         final CardView sbCardView = (CardView) findViewById(R.id.sbCardView);
         final CardView tmCardView = (CardView) findViewById(R.id.tmCardView);
-
-
 
 
         btnap.setOnClickListener(new View.OnClickListener() {
@@ -239,23 +226,97 @@ public class HospitalView extends AppCompatActivity {
 
     }
 
-    double getValue(String Type, String counter) {
-        mRoot = FirebaseDatabase.getInstance().getReference().child("hospitals").child(id).child(Type).child(counter);
-        mRoot.addValueEventListener(new ValueEventListener() {
+    void getValue(final String Type) {
+
+        getValueOf(Type, new OnGetDataListener() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
+                finalValue = value;
+                switch (Type) {
+                    case "A+":
+                        apb.setText(String.valueOf(finalValue));
+                        break;
+                    case "A-":
+                        anb.setText(String.valueOf(finalValue));
+                        break;
+                    case "B+":
+                        bpb.setText(String.valueOf(finalValue));
+                        break;
+                    case "AB+":
+                        abpb.setText(String.valueOf(finalValue));
+                        break;
+                    case "AB-":
+                        abnb.setText(String.valueOf(finalValue));
+                        break;
+                    case "B-":
+                        bnb.setText(String.valueOf(finalValue));
+                        break;
+                    case "O+":
+                        opb.setText(String.valueOf(finalValue));
+                        break;
+                    case "O-":
+                        onb.setText(String.valueOf(finalValue));
+                        break;
+                    case "total":
+                        bacount.setText(String.valueOf(finalValue));
+                        break;
+                    case "counter":
+                        bbcount.setText(String.valueOf(finalValue));
+                        mProgressDialog.dismiss();
+                        break;
+                    default:
+                        break;
+                }
+//                Toast.makeText(HospitalView.this, String.valueOf(finalValue), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(HospitalView.this, String.valueOf(value), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
+
+//        mRoot = FirebaseDatabase.getInstance().getReference().child("hospitals").child(id).child(Type).child(counter);
+//        mRoot.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.exists()) {
+//                    value = dataSnapshot.getValue(double.class);
+//                } else {
+//                    value = 0.0;
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//        return value;
+    }
+
+    void getValueOf(String type, final OnGetDataListener onGetDataListener) {
+        onGetDataListener.onStart();
+        DatabaseReference mRoot = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference typeRef = mRoot.child("campaigns").child(campaignId).child("records").child(type);
+        ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    value = dataSnapshot.getValue(double.class);
-                } else {
-                    value = 0.0;
-                }
+                int typeValue = dataSnapshot.getValue(Integer.class);
+                onGetDataListener.onSuccess(dataSnapshot, typeValue, "");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
-        return value;
+        };
+        typeRef.addListenerForSingleValueEvent(valueEventListener);
     }
 }
