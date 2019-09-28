@@ -24,6 +24,7 @@
 
 
         <EditText
+            android:drawablePadding="8dp"
             android:id="@+id/CNum"
             android:layout_width="match_parent"
             android:layout_height="45dp"
@@ -50,6 +51,7 @@
 
 
         <EditText
+            android:drawablePadding="8dp"
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="45dp"
@@ -73,6 +75,7 @@
 
 
         <EditText
+            android:drawablePadding="8dp"
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="45dp"

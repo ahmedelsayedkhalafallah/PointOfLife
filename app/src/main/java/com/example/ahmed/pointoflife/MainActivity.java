@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,21 +33,24 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    ArrayList<LatLng> campaignsLocations;
     DatabaseReference mRoot, mRootC, mRootBC, mRootH, mRootBCH;
+    LatLng myLocation;
     HashMap<String, Donator> h = new HashMap<String, Donator>();
     EditText id;
     String idS;
     TabHost tab;
     ImageView imageView;
-    EditText name, address, age, phone, type, nid, amount;
+    EditText name, address, age, phone, type,history, nid, amount,bagCode;
     TextView Sid, Sname, Saddress, Sage, Sphone, Stype, Sdonations;
-    String carId, hospitalId, ttype = "", campaignId,nameS, addressS, ageS, phoneS, typeS, nidS;
+    String carId, BagCode, ttype = "", campaignId,nameS,historyS, addressS, ageS, phoneS, typeS, nidS;
     int quantity = 500,lastTypeQuantity = 0;
     boolean valueFound = false, pointsDonationAgreement = false;
     TabHost tabHost;
@@ -57,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        campaignsLocations = new ArrayList<LatLng>();
         mProgressDialog = new ProgressDialog(this);
 
         Intent intent = getIntent();
@@ -103,11 +109,13 @@ public class MainActivity extends AppCompatActivity {
 
 
         name = findViewById(R.id.name);
+        history =findViewById(R.id.history);
         address = findViewById(R.id.address);
         age = findViewById(R.id.age);
         phone = findViewById(R.id.phone);
         nid = findViewById(R.id.nid);
         Stype = findViewById(R.id.dType);
+        bagCode = findViewById(R.id.bagCode);
         tab = (TabHost) findViewById(R.id.tabhost);
         tab.setup();
 
@@ -138,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("ClickableViewAccessibility")
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
 
                     ap.setScaleX(x);
                     ap.setScaleY(y);
@@ -176,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "B+";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -215,8 +223,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "A-";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -253,8 +261,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "B-";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -289,8 +297,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "AB+";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -326,8 +334,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "AB-";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -362,8 +370,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "O+";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -398,8 +406,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    float x = (float) 1.10;
-                    float y = (float) 1.10;
+                    float x = (float) 1.20;
+                    float y = (float) 1.20;
                     ttype = "O-";
                     ap.setScaleX(1);
                     ap.setScaleY(1);
@@ -433,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
 
         imageView = findViewById(R.id.checkImage);
         id = findViewById(R.id.id);
+
         mRoot = FirebaseDatabase.getInstance().getReference().child("donators");
         Sname = findViewById(R.id.dName);
         Sid = findViewById(R.id.dId);
@@ -508,7 +517,6 @@ public class MainActivity extends AppCompatActivity {
 
                             }
 
-
                         } else {
                             mProgressDialog.dismiss();
                             tabHost.setCurrentTab(1);
@@ -538,6 +546,7 @@ public class MainActivity extends AppCompatActivity {
         phoneS = phone.getText().toString();
         typeS = ttype;
         nidS = nid.getText().toString();
+        historyS = history.getText().toString();
         if (nameS.isEmpty()) {
             Toast.makeText(this, "Please enter donator name", Toast.LENGTH_SHORT).show();
         } else if (addressS.isEmpty()) {
@@ -550,6 +559,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Please choose donator blood type", Toast.LENGTH_SHORT).show();
         } else if (nidS.isEmpty()) {
             Toast.makeText(this, "Please enter donator ID number", Toast.LENGTH_SHORT).show();
+        } else if (historyS.isEmpty()) {
+            Toast.makeText(this, "Please enter Bag code", Toast.LENGTH_SHORT).show();
         } else {
 mProgressDialog.show();
             DatabaseReference mRoot = FirebaseDatabase.getInstance().getReference().child("donators").child(nidS);
@@ -615,7 +626,7 @@ mProgressDialog.show();
                 public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
                     mAddDonator.child("records").child("counter").setValue(value+1);
 mProgressDialog.dismiss();
-                }
+ }
 
                 @Override
                 public void onStart() {
@@ -628,6 +639,19 @@ mProgressDialog.dismiss();
                 }
             });
             //            tabHost.setCurrentTab(0);
+
+
+            DatabaseReference donatorRef = rootRef.child("donators").child(nidS).child("date");
+            donatorRef.setValue(getDate());
+            DatabaseReference bagsRoot = FirebaseDatabase.getInstance().getReference().child("campaigns").child(campaignId).child("bags").child(historyS);
+            bagsRoot.child("code").setValue(historyS);
+            bagsRoot.child("campaign").setValue(campaignId);
+            bagsRoot.child("donatorId").setValue(nidS);
+            bagsRoot.child("quantity").setValue(500);
+            bagsRoot.child("type").setValue(typeS);
+
+            DatabaseReference donatorRoot = FirebaseDatabase.getInstance().getReference().child("donators").child(nidS);
+            donatorRoot.child("donatingHistory").child(historyS).setValue(500);
 
             finish();
             startActivity(getIntent());
@@ -675,6 +699,8 @@ mProgressDialog.dismiss();
         String currentDateandTime = sdf.format(new Date());
         return currentDateandTime;
     }
+
+
 
 
 //void addBlood( ){
@@ -1110,9 +1136,10 @@ mProgressDialog.dismiss();
 
     public void addDonation(View view) {
         String input = amount.getText().toString();
+        BagCode = bagCode.getText().toString();
         int a = Integer.parseInt(input);
         quantity = a;
-mProgressDialog.show();
+        mProgressDialog.show();
         final DatabaseReference mAddDonator = FirebaseDatabase.getInstance().getReference().child("campaigns").child(campaignId);
         mAddDonator.child("donators").child(Sid.getText().toString()).setValue(quantity);
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
@@ -1182,7 +1209,7 @@ mProgressDialog.show();
             @Override
             public void onSuccess(DataSnapshot dataSnapshot, int value, String counter) {
                 mAddDonator.child("records").child("counter").setValue(value+1);
-mProgressDialog.dismiss();
+                mProgressDialog.dismiss();
             }
 
             @Override
@@ -1198,6 +1225,15 @@ mProgressDialog.dismiss();
         requestLocationUpdates();
         DatabaseReference donatorRef = rootRef.child("donators").child(Sid.getText().toString()).child("date");
         donatorRef.setValue(getDate());
+        DatabaseReference bagsRoot = FirebaseDatabase.getInstance().getReference().child("campaigns").child(campaignId).child("bags").child(BagCode);
+        bagsRoot.child("code").setValue(BagCode);
+        bagsRoot.child("campaign").setValue(campaignId);
+        bagsRoot.child("donatorId").setValue(Sid.getText().toString());
+        bagsRoot.child("quantity").setValue(input);
+        bagsRoot.child("type").setValue(Stype.getText().toString());
+
+        DatabaseReference donatorRoot = FirebaseDatabase.getInstance().getReference().child("donators").child(Sid.getText().toString());
+        donatorRoot.child("donatingHistory").child(BagCode).setValue(input);
         finish();
         startActivity(getIntent());
 //        addDonations(Type, a);
@@ -1243,8 +1279,7 @@ mProgressDialog.dismiss();
         if (permission == PackageManager.PERMISSION_GRANTED) {
 
 //...then request location updates//
-
-            client.requestLocationUpdates(request, new LocationCallback() {
+           client.requestLocationUpdates(request, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
 
@@ -1294,4 +1329,54 @@ mProgressDialog.dismiss();
             pointsDonationAgreement = true;
         }
     }
+
+//    void getCampaignsLocations(){
+//        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+//        DatabaseReference campaignsRef = rootRef.child("campaigns");
+//        ValueEventListener valueEventListener = new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+//                    double latitude = ds.child("location").child("latitude").getValue(Double.class);
+//                    double longitute = ds.child("location").child("longitude").getValue(Double.class);
+////                    Log.d(TAG, latitude ", " + longitute);
+//                    LatLng latLng = new LatLng(latitude, longitute);
+////                    Toast.makeText(MainActivity.this, String.valueOf(latLng.latitude), Toast.LENGTH_SHORT).show();
+//                   campaignsLocations.add(latLng);
+//                }
+//                clearFarLocations();
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+////                Log.d(TAG, databaseError.getMessage()); //Don't ignore errors!
+//            }
+//        };
+//        campaignsRef.addListenerForSingleValueEvent(valueEventListener);
+//    }
+//
+//    private void clearFarLocations() {
+//        double farLat,neerLat,farLong, neerLong;
+//        farLat = myLocation.latitude + 0.1;
+//        neerLat = myLocation.latitude - 0.1;
+//        farLong = myLocation.longitude + 0.1;
+//        neerLong = myLocation.longitude -0.1;
+//        for(int i = 0;i<campaignsLocations.size();i++){
+//        if(campaignsLocations.get(i).latitude>farLat||campaignsLocations.get(i).latitude<neerLat||campaignsLocations.get(i).longitude>farLong||campaignsLocations.get(i).longitude<neerLong){
+//            campaignsLocations.remove(i);
+//        }
+//        }
+//        for(int i = 0; i<campaignsLocations.size();i++){
+//            addCampaignToMap(campaignsLocations.get(i));
+//        }
+//    }
+//
+//    private void addCampaignToMap(LatLng latLng) {
+//        mMap.addMarker(new MarkerOptions()
+//                .position(latLng)
+//                .title("Neer campaign")
+//                .icon(BitmapDescriptorFactory
+//                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+//    }
+
 }

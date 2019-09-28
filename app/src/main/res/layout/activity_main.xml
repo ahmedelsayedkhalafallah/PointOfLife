@@ -53,6 +53,7 @@
                                 android:src="@mipmap/logo" />
 
                             <EditText
+                                android:drawablePadding="8dp"
                                 android:id="@+id/id"
                                 android:layout_width="match_parent"
                                 android:layout_height="40dp"
@@ -114,6 +115,7 @@
                             android:orientation="vertical">
 
                             <EditText
+                                android:drawablePadding="8dp"
                                 android:id="@+id/name"
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
@@ -128,6 +130,7 @@
                                 android:maxLines="1"/>
 
                             <EditText
+                                android:drawablePadding="8dp"
                                 android:id="@+id/nid"
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
@@ -144,6 +147,7 @@
                                 android:inputType="numberDecimal"/>
 
                             <EditText
+                                android:drawablePadding="16dp"
                                 android:id="@+id/address"
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
@@ -156,6 +160,7 @@
                                 />
 
                             <EditText
+                                android:drawablePadding="8dp"
                                 android:id="@+id/age"
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
@@ -169,6 +174,7 @@
                                 android:inputType="numberDecimal"/>
 
                             <EditText
+                                android:drawablePadding="8dp"
                                 android:id="@+id/phone"
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
@@ -198,21 +204,21 @@
                                     android:id="@+id/bp"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
+                                    android:layout_marginLeft="16dp"
                                     android:src="@mipmap/bp" />
 
                                 <ImageView
                                     android:id="@+id/abp"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
+                                    android:layout_marginLeft="16dp"
                                     android:src="@mipmap/abp" />
 
                                 <ImageView
                                     android:id="@+id/op"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
+                                    android:layout_marginLeft="16dp"
                                     android:src="@mipmap/op" />
 
 
@@ -235,34 +241,35 @@
                                     android:id="@+id/bm"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
+                                    android:layout_marginLeft="16dp"
                                     android:src="@mipmap/bm" />
 
                                 <ImageView
                                     android:id="@+id/abm"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
+                                    android:layout_marginLeft="16dp"
                                     android:src="@mipmap/abm" />
 
                                 <ImageView
                                     android:id="@+id/om"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
+                                    android:layout_marginLeft="16dp"
                                     android:src="@mipmap/om" />
 
                             </LinearLayout>
 
 
                             <EditText
+                                android:drawablePadding="8dp"
                                 android:id="@+id/history"
                                 android:layout_width="match_parent"
                                 android:layout_height="30dp"
                                 android:layout_marginTop="25dp"
                                 android:background="@drawable/draw1"
                                 android:drawableLeft="@mipmap/historyblood"
-                                android:hint="   History of Diseases"
+                                android:hint="   Bag code"
                                 android:paddingLeft="20dp"
                                 android:textColor="@android:color/black" />
                             <CheckBox
@@ -598,6 +605,7 @@
                                             android:onClick="decrease"/>
 
                                         <EditText
+                                            android:drawablePadding="8dp"
                                             android:id="@+id/amount"
                                             android:inputType="numberDecimal"
                                             android:text="500"
@@ -618,6 +626,17 @@
                                             />
                                     </LinearLayout>
 
+                                    <EditText
+                                        android:drawablePadding="8dp"
+                                        android:id="@+id/bagCode"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:lines="1"
+                                        android:singleLine="true"
+                                        android:maxLines="1"
+                                        android:maxLength="6"
+                                        android:hint="Bag code"/>
+
                                 </LinearLayout>
 
 
@@ -628,6 +647,7 @@
                                 android:text="Allow points donation"
                                 android:onClick="onCheckboxClicked"
                                 android:layout_gravity="center_horizontal"/>
+
                             <Button
                                 android:layout_width="120dp"
                                 android:layout_height="30dp"
